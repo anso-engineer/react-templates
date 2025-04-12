@@ -5,18 +5,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "./talbeManagement.css";
 
-/**
- * Generic table management component.
- *
- * Props:
- * - tableObj: array of objects to render
- * - addHandler: function to call when Add is clicked
- * - editHandler: function to call with the row object to edit
- * - removeHandler: function to call with the row object to delete
- * - isFilter: boolean to enable text filter
- * - filterFields: array of string field names to filter by
- * - columnWidths: array of column widths to apply
- */
 function TableManagement({
                              tableObj,
                              addHandler,
@@ -24,7 +12,7 @@ function TableManagement({
                              removeHandler,
                              isFilter = false,
                              filterFields = [],
-                             columnWidths = [],  // Added column widths as a prop
+                             columnConfigs = [], // Custom column configs passed as props
                          }) {
     const [filterText, setFilterText] = useState("");
 
@@ -41,14 +29,28 @@ function TableManagement({
         return <div className="p-3">No data available.</div>;
     }
 
-    // Generate column definitions with optional column width
-    const baseColumns = Object.keys(tableObj[0]).map((key, index) => ({
-        name: key.toUpperCase(),
-        selector: (row) => row[key],
-        sortable: true,
-        wrap: true,
-        style: columnWidths[index] ? { minWidth: columnWidths[index], maxWidth: columnWidths[index] } : {},
-    }));
+    // Dynamically create columns based on tableObj keys and custom configurations
+    const baseColumns = Object.keys(tableObj[0]).map((key) => {
+        const columnConfig = columnConfigs.find((config) => config.name.toLowerCase() === key.toLowerCase());
+
+        // Default column configuration
+        const column = {
+            name: key.toUpperCase(),  // Column name (key)
+            selector: (row) => row[key],  // How to get the value for this column
+            sortable: true,  // Allow sorting
+            wrap: true,  // Wrap the text in the cell
+        };
+
+        // If custom configuration exists for this column, merge it
+        if (columnConfig) {
+            return {
+                ...column,
+                ...columnConfig,  // Apply custom properties like maxWidth, cell, etc.
+            };
+        }
+
+        return column;
+    });
 
     // Action column if edit/delete available
     const actionsColumn = {
@@ -87,6 +89,25 @@ function TableManagement({
         columns.push(actionsColumn);
     }
 
+    // Dynamically create customStyles for width and growth
+    const customStyles = columns.reduce((acc, col, index) => {
+        acc.headCells = acc.headCells || {};
+        acc.cells = acc.cells || {};
+
+        // If column has a 'width' property, set both minWidth and maxWidth
+        if (col.width) {
+            acc.headCells.style = acc.headCells.style || {};
+            acc.cells.style = acc.cells.style || {};
+            acc.headCells.style.minWidth = col.width;
+            acc.headCells.style.maxWidth = col.width;
+            acc.cells.style.minWidth = col.width;
+            acc.cells.style.maxWidth = col.width;
+        }
+
+        return acc;
+    }, {});
+
+
     return (
         <div className="p-4 table-outline">
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -101,7 +122,10 @@ function TableManagement({
                 )}
 
                 {addHandler && (
-                    <Button style={{width: "40px", height: "40px", marginRight: "15px"}} variant="success" onClick={addHandler}>
+                    <Button style={{ marginRight: "20px" }}
+                            className="action-button"
+                            size="sm"
+                            variant="success" onClick={addHandler}>
                         <i className="bi bi-plus"></i>
                     </Button>
                 )}
@@ -113,20 +137,7 @@ function TableManagement({
                 pagination
                 highlightOnHover
                 dense
-                customStyles={{
-                    headCells: {
-                        style: {
-                            minWidth: "100px",  // You can define a base width for header cells
-                            maxWidth: "200px",
-                        },
-                    },
-                    cells: {
-                        style: {
-                            minWidth: "100px",  // You can define a base width for data cells
-                            maxWidth: "200px",
-                        },
-                    },
-                }}
+                customStyles={customStyles}
             />
         </div>
     );
