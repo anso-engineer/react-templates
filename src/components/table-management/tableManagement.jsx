@@ -17,17 +17,14 @@ function TableManagement({
     const [filterText, setFilterText] = useState("");
 
     // Filter data based on filterFields and filterText
-    const filteredData = isFilter && filterText
-        ? tableObj.filter((item) =>
+    const filteredData = React.useMemo(() => {
+        if (!isFilter || !filterText) return [...tableObj];
+        return tableObj.filter((item) =>
             filterFields.some((field) =>
                 item[field]?.toString().toLowerCase().includes(filterText.toLowerCase())
             )
-        )
-        : tableObj;
-
-    if (!Array.isArray(tableObj) || tableObj.length === 0) {
-        return <div className="p-3">No data available.</div>;
-    }
+        );
+    }, [tableObj, filterText, filterFields, isFilter]);
 
     // Dynamically create columns based on tableObj keys and custom configurations
     const baseColumns = Object.keys(tableObj[0]).map((key) => {
