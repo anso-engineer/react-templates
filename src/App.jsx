@@ -6,7 +6,7 @@ function App() {
     const users = [
         { id: 1, name: "Jose", role: "Admin" },
         { id: 2, name: "Yuana", role: "User" },
-        { id: 2, name: "Christina", role: "User" },
+        { id: 3, name: "Christina", role: "User" },
     ];
 
     // Define column configurations with at least 30px width for each column
