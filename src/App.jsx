@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import TableManagement from "./components/table-management/tableManagement.jsx";
+import TableManagement from "./components/table-management/TableManagement.jsx";
 
 function App() {
     const users = [
