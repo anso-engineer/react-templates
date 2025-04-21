@@ -9,6 +9,10 @@ function App() {
         { id: 3, name: "Christina", role: "User" },
     ];
 
+    const handleRowDoubleClick = (row) => {
+        console.log("Double-clicked row: ", row);
+    };
+
     // Define column configurations with at least 30px width for each column
     const columnConfigs = [
         {
@@ -35,6 +39,7 @@ function App() {
                     removeHandler={(item) => console.log("Remove", item)}
                     isFilter={true}
                     filterFields={["name", "role"]}
+                    doubleClickHandler={handleRowDoubleClick} // Pass the double-click handler
                     columnConfigs={columnConfigs} // Pass custom column configurations here
                 />
             </div>
